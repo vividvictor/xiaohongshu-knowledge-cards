@@ -1,0 +1,13 @@
+.agents/
+.codex/
+tmp/
+output/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+Thumbs.db

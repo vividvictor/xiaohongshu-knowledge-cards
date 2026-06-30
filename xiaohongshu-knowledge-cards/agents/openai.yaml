@@ -1,0 +1,7 @@
+interface:
+  display_name: "小红书知识卡片"
+  short_description: "将文章、主题或笔记转成无需生图的3:4小红书知识卡片"
+  default_prompt: "使用 $xiaohongshu-knowledge-cards 将这篇文章或主题转成无需单独生图的多页小红书知识卡片。"
+
+policy:
+  allow_implicit_invocation: true
