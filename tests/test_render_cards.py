@@ -61,7 +61,7 @@ class RenderCardsTest(unittest.TestCase):
             self.assertEqual(labels, ["02/04", "03/04"])
             self.assertFalse(any("页" in label or "第" in label or "共" in label for label in labels))
 
-    def test_visual_path_is_ignored_for_code_graphic_cover(self):
+    def test_cover_without_visual_brief_uses_typographic_layout(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             external_visual = tmp_path / "external.png"
@@ -96,7 +96,7 @@ class RenderCardsTest(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             manifest = json.loads((out_dir / "manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(manifest["pages"][0]["visual_source"], "code-graphic")
+            self.assertEqual(manifest["pages"][0]["visual_source"], "typographic")
             self.assertNotIn("visual_path", manifest["pages"][0])
 
     def test_palette_rejects_more_than_three_colors(self):

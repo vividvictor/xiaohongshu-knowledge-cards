@@ -9,7 +9,8 @@
 - `audience`：字符串，推荐填写。这套卡片面向的读者。
 - `promise`：字符串，推荐填写。承诺给读者的有用结果。
 - `angle`：字符串，推荐填写。筛选源内容的编辑角度。
-- `visual_brief`：字符串，推荐填写。封面代码图形的可视化方向，例如数据可视化、几何图形、排版和文字风格。不要用它调用生图。
+- `visual_brief`：字符串，可选。只有封面确实需要核心图形时填写，用于描述代码绘制的可视化方向，例如数据可视化、几何图形、排版和文字风格。没有特别要展现的核心图时留空，渲染器会使用纯文字排版封面。不要用它调用生图。
+- `visual_mode`：字符串，可选。可设为 `graphic`/`code-graphic` 强制代码图形封面，或设为 `typographic`/`none` 强制纯文字排版封面。
 - `palette`：对象或数组，必填。最多 3 种颜色。
   - 对象键建议使用 `background`、`text`、`accent`。
   - 颜色值必须是类似 `#FFFFFF` 的十六进制颜色。
@@ -65,9 +66,12 @@
 {
   "type": "cover",
   "title": "主题标题",
-  "subtitle": "一句话说明"
+  "subtitle": "一句话说明",
+  "visual_mode": "typographic"
 }
 ```
+
+封面默认规则：如果顶层或封面页存在非空 `visual_brief`，使用 `code-graphic`；否则使用 `typographic`。不要为了装饰而强制生成主视觉。
 
 ### Content
 
@@ -122,7 +126,7 @@
 
 - `title`、`subtitle`、`audience`、`promise`、`angle`、`visual_brief`
 - `size`、`page_count`、`palette`、`font_path`、`font_style`
-- 每一页的文件名、页面类型、内容页页码、block 类型、封面视觉来源
+- 每一页的文件名、页面类型、内容页页码、block 类型、封面视觉来源。封面视觉来源可能是 `code-graphic` 或 `typographic`
 - `quality_checks`
 
 ## 写作规则
@@ -132,3 +136,4 @@
 - 段落文字要足够短，避免为了塞内容把字号缩到不可读。
 - 整套卡片颜色不超过 3 种。
 - 使用较粗的非衬线字体。
+- 封面没有明确核心图形时，优先用标题、副标题、线条、关键词和留白完成视觉层级。

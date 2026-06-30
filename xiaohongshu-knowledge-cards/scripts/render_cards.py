@@ -199,6 +199,41 @@ def draw_code_graphic_visual(draw, box, palette):
         draw.arc((center[0] - radius, center[1] - radius, center[0] + radius, center[1] + radius), 210, 335, fill=bg, width=5)
 
 
+def cover_visual_source(page, deck):
+    visual_mode = str(page.get("visual_mode") or deck.get("visual_mode") or "").strip().lower()
+    if visual_mode in ("typographic", "none", "text"):
+        return "typographic"
+    if visual_mode in ("graphic", "code-graphic"):
+        return "code-graphic"
+    visual_brief = str(page.get("visual_brief") or deck.get("visual_brief") or "").strip()
+    return "code-graphic" if visual_brief else "typographic"
+
+
+def draw_typographic_cover(draw, title, subtitle, deck, fonts, palette, size):
+    width, height = size
+    margin = int(width * 0.085)
+    text = palette["text"]
+    accent = palette["accent"]
+
+    draw.line((margin, int(height * 0.55), width - margin, int(height * 0.55)), fill=accent, width=5)
+    draw.line((margin, int(height * 0.575), width - margin, int(height * 0.575)), fill=text, width=2)
+
+    label = deck.get("angle") or deck.get("promise") or "知识卡片"
+    draw_wrapped(draw, label, (margin, int(height * 0.61)), fonts["small"], text, width - margin * 2, line_gap=8, max_lines=2)
+
+    keyword = deck.get("audience") or "小红书知识卡片"
+    draw.rounded_rectangle(
+        (margin, int(height * 0.77), width - margin, int(height * 0.855)),
+        radius=22,
+        outline=accent,
+        width=4,
+    )
+    draw_wrapped(draw, keyword, (margin + 30, int(height * 0.795)), fonts["body_bold"], accent, width - margin * 2 - 60, line_gap=8, max_lines=1)
+
+    if not subtitle:
+        draw.text((margin, height - 120), "KNOWLEDGE CARDS", font=fonts["small"], fill=text)
+
+
 def draw_cover(draw, image, page, deck, fonts, palette, size):
     width, height = size
     margin = int(width * 0.085)
@@ -214,8 +249,11 @@ def draw_cover(draw, image, page, deck, fonts, palette, size):
         y += 18
         y = draw_wrapped(draw, subtitle, (margin, y), fonts["body"], palette["text"], width - margin * 2, line_gap=10, max_lines=2)
 
-    visual_box = (margin, int(height * 0.52), width - margin, int(height * 0.86))
-    draw_code_graphic_visual(draw, visual_box, palette)
+    if cover_visual_source(page, deck) == "code-graphic":
+        visual_box = (margin, int(height * 0.52), width - margin, int(height * 0.86))
+        draw_code_graphic_visual(draw, visual_box, palette)
+    else:
+        draw_typographic_cover(draw, title, subtitle, deck, fonts, palette, size)
 
     draw.text((margin, height - 120), "知识卡片", font=fonts["small"], fill=palette["text"])
 
@@ -358,7 +396,7 @@ def make_fonts(size, font_path=None):
 
 
 def get_visual_source(page, deck):
-    return "code-graphic"
+    return cover_visual_source(page, deck)
 
 
 def page_label(page_index, total):
