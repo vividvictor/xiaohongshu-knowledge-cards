@@ -1,6 +1,6 @@
 # 小红书知识卡片 Skill
 
-这是一个 Codex skill，用于把文章、笔记、提纲或主题生成 3:4 多页小红书知识卡片 PNG。
+这是一个兼容 Codex 与 WorkBuddy 的 Agent Skill，用于把文章、笔记、提纲或主题生成 3:4 多页小红书知识卡片 PNG。
 
 它的重点不是把长文机械分页，而是先提炼读者收益和传播角度，再用列表、流程、对比、重点框、引用等结构，把一个观点做成更容易看完、记住和转发的卡片组。
 
@@ -8,7 +8,9 @@
 
 - 固定输出 3:4 竖版卡片，默认尺寸 `1080x1440`。
 - 自动生成封面页、内容页和结尾页。
-- 不单独调用生图；有核心图形时用代码绘制的数据可视化或几何图形，没有核心图形时封面可使用纯文字、线条和排版。
+- 封面主视觉根据用户本次内容主题动态生成，不使用固定通用图；所有中文仍由本地 Pillow 排版。
+- 正文默认 `dense`，使用四级字阶、统一网格与结构化模块，一页可容纳更多有效信息。
+- 内容页可按需要使用主题图，也可用代码排版；生图能力按运行时检测，不写死 Codex 或 WorkBuddy 接口。
 - 整套卡片颜色不超过 3 种。
 - 默认使用较粗的中文非衬线字体。
 - 内容页页码使用纯数字格式，例如 `02/06`。
@@ -23,6 +25,8 @@ xiaohongshu-knowledge-cards/
     openai.yaml
   references/
     card-content-schema.md
+    layout-design.md
+    runtime-compatibility.md
   scripts/
     render_cards.py
 tests/
@@ -31,7 +35,7 @@ tests/
 
 ## 安装方法
 
-把本仓库克隆到本地后，将 skill 目录复制到 Codex skills 目录。
+把本仓库克隆到本地后，将 skill 目录复制到目标宿主的 skills 目录。Codex 默认使用 `~/.codex/skills/`；WorkBuddy 可从 Skill Marketplace 导入以 `SKILL.md` 为根文件的 skill 包，或使用其本地 skills 目录。
 
 Windows PowerShell 示例：
 
@@ -48,7 +52,7 @@ Copy-Item -Recurse -Force `
 $env:CODEX_HOME\skills\xiaohongshu-knowledge-cards
 ```
 
-安装后，在 Codex 中可以用类似下面的请求触发：
+安装后，在 Codex 或 WorkBuddy 中可以用类似下面的请求触发：
 
 ```text
 使用 $xiaohongshu-knowledge-cards 把这篇文章生成小红书知识卡片
@@ -92,7 +96,7 @@ python .\xiaohongshu-knowledge-cards\scripts\render_cards.py `
   "audience": "想把长内容做成小红书卡片的人",
   "promise": "用一条主线把知识压缩成可看完、可记住、可复述的卡片组",
   "angle": "从传播目标倒推卡片结构，而不是把原文机械分页",
-  "visual_brief": "抽象的信息流、结构重组和行动路径",
+  "density": "dense",
   "palette": {
     "background": "#F9F5EF",
     "text": "#1F2933",
@@ -102,7 +106,12 @@ python .\xiaohongshu-knowledge-cards\scripts\render_cards.py `
     {
       "type": "cover",
       "title": "把知识变成行动",
-      "subtitle": "从文章到卡片的3步表达法"
+      "subtitle": "从文章到卡片的3步表达法",
+      "visual_mode": "ai-visual",
+      "theme_keywords": ["文章", "知识卡片", "行动"],
+      "visual_concept": "散乱的文章纸片经过漏斗重组为三张清晰卡片，并延伸成一条行动路径",
+      "image_prompt": "Editorial illustration of article fragments reorganizing into three cards and an action path; no text, no letters; 3:4 vertical.",
+      "image_path": "output/assets/cover.png"
     },
     {
       "type": "content",
@@ -141,6 +150,7 @@ python .\xiaohongshu-knowledge-cards\scripts\render_cards.py `
 - `steps`：步骤流程。
 - `flow`：因果、递进、前后变化。
 - `comparison`：左右对比。
+- `fact_grid`：两列事实、术语或数据卡片。
 - `quote`：金句或强记忆点。
 - `callout`：重点提醒或核心判断。
 
@@ -162,10 +172,11 @@ manifest.json
 - 调色板。
 - 每页类型和文件名。
 - 内容页页码，例如 `02/06`。
-- 字体风格：`bold-sans`。
-- 封面视觉来源：`code-graphic` 或 `typographic`。
+- 密度与布局系统：`dense`、`content-first-grid-v2`。
+- 字体风格：`four-level-cjk-sans`。
+- 每页的视觉来源与可见字符数；AI 页另含 `image_path` 和 `visual_concept`。
 
-封面规则：如果 JSON 中填写了 `visual_brief`，渲染器会绘制代码图形封面；如果没有特别要展现的核心图，留空 `visual_brief`，封面会使用纯文字排版。也可以在顶层或封面页设置 `visual_mode` 为 `graphic`、`code-graphic`、`typographic` 或 `none` 来手动指定。
+封面规则：`ai-visual` 封面必须有从当前内容提炼的 `theme_keywords`、`visual_concept` 和有效 `image_path`。没有生图能力时可降级为 `code-graphic` 或 `typographic`；不得伪造图片路径。
 
 ## 验证
 
